@@ -1,6 +1,7 @@
 var mongoose = require("mongoose");
 var express = require('express');
 var app = express();
+app.set("view engine", "ejs");
 
 var request = require('request');
 mongoose.connect("mongodb://thunghiem:123456@ds149201.mlab.com:49201/img-search");
@@ -11,6 +12,11 @@ var historySchema = new mongoose.Schema({
 });
 
 var History = mongoose.model("history", historySchema);
+
+//Homepage
+app.get("/home", function(req, res){
+    res.render("index");
+});
 
 app.get("/lastest", function(req, res){
     History.find({}, function(err, histories){
@@ -29,7 +35,9 @@ app.get("/lastest", function(req, res){
 
 app.get("/:keyword", function(req, res){
     var keyword = req.params.keyword.replace('%20', ' ');
-    var offset = req.query.offset;
+    var offset = 0;
+    
+    if (req.query.offset != null) offset = req.query.offset;
     
     request(getRequest(keyword, offset), function(error, response, body){
         if (!error && response.statusCode == 200) {
