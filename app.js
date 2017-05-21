@@ -18,7 +18,7 @@ app.get("/index", function(req, res){
     res.render("index");
 });
 
-app.get("/lastest", function(req, res){
+app.get("/latest", function(req, res){
     History.find({}, function(err, histories){
         if (err) throw err;
         
