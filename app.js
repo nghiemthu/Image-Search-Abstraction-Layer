@@ -14,7 +14,7 @@ var historySchema = new mongoose.Schema({
 var History = mongoose.model("history", historySchema);
 
 //Homepage
-app.get("/home", function(req, res){
+app.get("/index", function(req, res){
     res.render("index");
 });
 
@@ -33,6 +33,7 @@ app.get("/lastest", function(req, res){
 
 //History.find({}).remove().exec();
 
+//Get data
 app.get("/:keyword", function(req, res){
     var keyword = req.params.keyword.replace('%20', ' ');
     var offset = 0;
@@ -44,6 +45,7 @@ app.get("/:keyword", function(req, res){
             var info = JSON.parse(body);
             var result = [];
             
+            // Loop through all items and get url, snippet, thumnail and context
             info.value.forEach(function(val){
                 var item = {
                               'url': val.contentUrl,
@@ -54,23 +56,28 @@ app.get("/:keyword", function(req, res){
                 result.push(item);
             });
             
+            // Find all and remove the first item if there are more than 10 items
             History.find({}, function(err, histories){
                 if (err) throw err;
                 else {
+                    // Remove if more than 10
                     if (histories.length >= 10) {
                         History.find({ _id: histories[0]._id }).remove().exec();
                     };
                     
-                    //Save to database
-                    History.create({
-                        term: keyword,
-                        when: new Date()
-                    },function(err, url){
-                        if (err) throw err;
-                    });
+                    if (keyword !== 'favicon.ico') {
+                        //Save to database
+                        History.create({
+                            term: keyword,
+                            when: new Date()
+                        },function(err, url){
+                            if (err) throw err;
+                        });
+                    }
                 }
             });
-        
+            
+            //Send data
             res.send(result);
         } else res.send('Error');
     });
